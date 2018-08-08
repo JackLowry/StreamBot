@@ -1,0 +1,12 @@
+{
+  "name": "StreamerBot",
+  "version": "1.0.0",
+  "description": "Sends a message when a streamer from a certain list starts streaming",
+  "main": "bot.js",
+  "author": "Jack Lowry",
+  "dependencies": {
+    "discord.io": "github:woor/discord.io#gateway_v6",
+    "node-fetch": "^2.2.0",
+    "winston": "^3.0.0"
+  }
+}

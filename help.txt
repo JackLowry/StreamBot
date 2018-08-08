@@ -1,0 +1,14 @@
+add_streamer <streamer username>
+    Adds the streamer to the watchlist.
+
+remove_streamer <streamer username>
+    Removes the streamer from the watchlist.
+
+set_home_channel
+    Sets the home channel to where the message was sent. I will send updates when a watched streamer goes live to this channel.
+
+list_streamers
+    Lists all streamers on the watchlist.
+
+currently_streaming
+    Lists all streamers on the watchlist currently online.
