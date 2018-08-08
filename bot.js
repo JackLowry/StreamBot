@@ -197,12 +197,12 @@ async function checkStreamerAPI() {
 
           //checks to see if the stream is live. If the stream is not on the list of current streamers (aka, they started recently), it sends a message out.
           async function checkIfStreamingPrior(apiData, stream) {
-            if(json.data[0] != null) {
-              index = wasStreaming.indexOf(streamer.id);
+            if(stream != null) {
+              index = wasStreaming.indexOf(stream.id);
               if(index == -1) {
                 bot.sendMessage({
                   to: homeChannel,
-                  message: "https://twitch.tv/" + streamer.name + " is now streaming! Go check them out!"
+                  message: "https://twitch.tv/" + stream.name + " is now streaming! Go check them out!"
                 });
               }
               return stream.id;
