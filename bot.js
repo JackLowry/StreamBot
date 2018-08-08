@@ -153,6 +153,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                       }
                     }
                   }
+                  currentlyStreaming = currentlyStreaming.map(x => "https://twitch.tv/" + x);
                   if(currentlyStreaming.length == 0) {
                     currentlyStreaming[0] = "None";
                   }
@@ -186,7 +187,7 @@ async function checkStreamerAPI() {
     if(parseJson.data.length == 0) {
       return;
     }
-      var nowStreaming = [];
+    var nowStreaming = [];
     for(const streamer of parseJson.data) {
       fetch('https://api.twitch.tv/helix/streams?user_id=' + streamer.id, {headers:{'Client-ID': 'm0rdmtnk9m9xs4al5brwgb690oscek'}})
         .then(function(response) {
@@ -195,21 +196,30 @@ async function checkStreamerAPI() {
         .then(function(json) {
 
           //checks to see if the stream is live. If the stream is not on the list of current streamers (aka, they started recently), it sends a message out.
-          if(json.data[0] != null) {
-            nowStreaming.push(streamer.id);
-            index = wasStreaming.indexOf(streamer.id);
-            if(index == -1) {
-              bot.sendMessage({
-                to: homeChannel,
-                message: "twitch.tv/" + streamer.name + " is now streaming! Go check them out!"
-              });
+          async function checkIfStreamingPrior(apiData, stream) {
+            if(json.data[0] != null) {
+              index = wasStreaming.indexOf(streamer.id);
+              if(index == -1) {
+                bot.sendMessage({
+                  to: homeChannel,
+                  message: "https://twitch.tv/" + streamer.name + " is now streaming! Go check them out!"
+                });
+              }
+              return stream.id;
             }
+            return null;
           }
-          if(streamer.id == parseJson.data[parseJson.data.length-1].id) {
-            logger.info((new Date()).toUTCString() + ": " + (parseJson.data.length) + " calls made. Currently Streaming: " + nowStreaming.join(", "));
-            wasStreaming = nowStreaming;
+          checkIfStreamingPrior(json, streamer)
+              .then(id => {
+                if(id != null) {
+                  nowStreaming.push(id);
+                }
+                if(streamer.id == parseJson.data[parseJson.data.length-1].id) {
+                  logger.info((new Date()).toUTCString() + ": " + (parseJson.data.length) + " calls made. Currently Streaming: " + nowStreaming.join(", "));
+                  wasStreaming = nowStreaming.slice(0);
+                }
+              });
 
-          }
         });
       }
   });
