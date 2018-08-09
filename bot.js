@@ -177,7 +177,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
      }
 });
 
-async function checkStreamerAPI() {
+function checkStreamerAPI() {
   logger.info((new Date()).toUTCString() + ": starting calls" );
   var userCall = "";
   var first = true;
@@ -188,16 +188,14 @@ async function checkStreamerAPI() {
       return;
     }
     var nowStreaming = [];
-    for(const streamer of parseJson.data) {
-      fetch('https://api.twitch.tv/helix/streams?user_id=' + streamer.id, {headers:{'Client-ID': 'm0rdmtnk9m9xs4al5brwgb690oscek'}})
+    var counter = 0;
+    for(let stream of parseJson.data) {
+      fetch('https://api.twitch.tv/helix/streams?user_id=' + stream.id, {headers:{'Client-ID': 'm0rdmtnk9m9xs4al5brwgb690oscek'}})
         .then(function(response) {
           return response.json();
         })
         .then(function(json) {
-
-          //checks to see if the stream is live. If the stream is not on the list of current streamers (aka, they started recently), it sends a message out.
-          async function checkIfStreamingPrior(apiData, stream) {
-            if(stream != null) {
+            if(json.data[0] != null) {
               index = wasStreaming.indexOf(stream.id);
               if(index == -1) {
                 bot.sendMessage({
@@ -205,22 +203,14 @@ async function checkStreamerAPI() {
                   message: "https://twitch.tv/" + stream.name + " is now streaming! Go check them out!"
                 });
               }
-              return stream.id;
+              nowStreaming.push(stream.id);
             }
-            return null;
-          }
-          checkIfStreamingPrior(json, streamer)
-              .then(id => {
-                if(id != null) {
-                  nowStreaming.push(id);
-                }
-                if(streamer.id == parseJson.data[parseJson.data.length-1].id) {
-                  logger.info((new Date()).toUTCString() + ": " + (parseJson.data.length) + " calls made. Currently Streaming: " + nowStreaming.join(", "));
-                  wasStreaming = nowStreaming.slice(0);
-                }
-              });
-
+            counter++;
+            if(counter === parseJson.data.length) {
+              logger.info((new Date()).toUTCString() + ": " + (parseJson.data.length) + " calls made. Currently Streaming: " + nowStreaming.join(", "));
+              wasStreaming = nowStreaming.slice(0);
+            }
         });
-      }
+    }
   });
 }
